@@ -1,0 +1,211 @@
+{
+  "name": "Today's Penny Stock",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        336,
+        336
+      ],
+      "id": "71c8933d-84f0-4518-a4e7-65b7510a7ca5",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "google_ai_mode",
+        "q": "Top penny stocks to buy in India for long-term investment, including stock names and IDs",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApi",
+      "typeVersion": 1,
+      "position": [
+        560,
+        336
+      ],
+      "id": "669d097a-9a4a-46f6-b98e-f30d920cb690",
+      "name": "Google_ai_mode search",
+      "credentials": {
+        "serpApi": {
+          "id": "r9qikz5VvGhCvzJH",
+          "name": "SerpApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is the data from SerpAI:\n\n<text_blocks>\n{{ $json.text }}\n</text_blocks>\n\nPlease analyze the above text_blocks and provide **one long-term future-focused Indian penny stock** recommendation in the Telegram-ready format specified by the system prompt.",
+        "options": {
+          "systemMessage": "You are a highly intelligent financial research assistant specialized in the Indian stock market. You will receive a JSON output from SerpAI that contains an array of \"text_blocks\". Your task is to analyze that data and choose **the best long‑term, future-focused penny stock in India** for investment today. **It is critical that the exact stock symbol (Stock ID) from the context is retained and used in your output.**\n\n🔍 Requirements:\n\n1. Parse all \"text_blocks\" in the JSON and extract relevant details about companies, including:\n   - Company name and **exact stock symbol / Stock ID** as mentioned in the text\n   - Current share price (if mentioned in text)\n   - Industry / sector\n   - Growth trends, news, analyst insights, or catalysts\n   - Any financials mentioned (revenue growth, profitability signals, etc.)\n   - Positive or negative sentiment\n\n2. Only consider stocks:\n   - Listed on Indian exchanges\n   - Currently trading at typical penny stock levels (generally share price < ₹100 or described as penny/low‑priced in text)\n   - With evidence of *long‑term growth potential* (innovation, emerging sector, strong future narrative)\n\n3. **Do NOT invent or modify stock names, stock symbols, or facts. Only use information from the \"text_blocks\".**  \n\n🎯 Output Format (Telegram‑ready):\n\nYour output MUST be formatted exactly as below (use markdown and emojis). **Ensure the stock symbol (Stock ID) matches exactly what is in the source text.**\n\n📈 *Best Penny Stock for Today — Indian Market*\n\n*Company:* {Company Name} (`{Stock Symbol}`)  \n🚀 *Growth Potential:* {growth_potential_summary}  \n📌 *Key Reason:* {reason_for_selection}  \n⚠️ *Key Risks:* {risks_summary}\n\nExample:\n\n📈 *Best Penny Stock for Today — Indian Market*\n\n*Company:* Tata Steel (`TATASTEEL`)  \n🚀 *Growth Potential:* Strong infrastructure growth + cement demand  \n📌 *Key Reason:* Positive trend & future sector demand  \n⚠️ *Key Risks:* Commodity price exposure\n\nMake sure the response is clear, concise, and complies with the format above. **Always retain the exact stock symbol (Stock ID) from the text.**\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1360,
+        336
+      ],
+      "id": "23d6dd90-96f6-4675-9b7d-3c9d59783bf2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "chatId": "-5208920992",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1712,
+        336
+      ],
+      "id": "a456b942-d618-447a-be18-4a411f635b8d",
+      "name": "Send a text message",
+      "webhookId": "4c1b6737-50b6-495d-bae2-38f71a6777be",
+      "credentials": {
+        "telegramApi": {
+          "id": "CBRIavUmUwTdV7s2",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a financial analysis assistant. Your task is to read the financial context provided below and generate a concise, structured summary that can help an investor make informed decisions. **It is critical that you retain and reference the exact stock ID(s) mentioned in the context** wherever relevant. Focus on key insights, trends, opportunities, and risk factors. Highlight actionable recommendations where possible, but maintain a neutral tone.\n\nInput Financial Context:\n\"\"\"\n{{ $json.combinedString }}\n\"\"\"\n\nInstructions:\n1. Summarize the overall market and sector trends.\n2. List the most promising investment opportunities and explain why, **including the exact stock ID(s)** from the context.\n3. Highlight sector-specific growth areas.\n4. Mention key filters or criteria an investor should consider (e.g., revenue growth, debt levels, promoter integrity, liquidity).\n5. Include any potential risks or disclaimers relevant to the investments.\n6. Present the summary in a structured format with headings and bullet points for clarity.\n7. Ensure that any stock references explicitly include the stock ID from the context.\n\nOutput format example:\n\nMarket Overview:\n- [Brief summary of market conditions, sectors with growth potential]\n\nTop Investment Opportunities:\n- [Stock Name (Stock ID)]: [Reason why it’s attractive]\n\nSector-Specific Opportunities:\n- [Sector Name]: [Key insights or companies with stock IDs]\n\nInvestment Filters:\n- [Filter 1]\n- [Filter 2]\n\nRisks / Disclaimer:\n- [Key risks to be aware of]\n\nProvide the summary in plain text, concise, and easy to read for financial decision-making.\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1008,
+        336
+      ],
+      "id": "19681bd0-2cef-4c5c-9e2b-add3a4d29de3",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Recursive function to extract all text\nfunction extractText(item) {\n  let texts = [];\n\n  // Add snippet if it exists\n  if (item.snippet && typeof item.snippet === \"string\") {\n    texts.push(item.snippet);\n  }\n\n  // If item has a 'list' array, add each element\n  if (Array.isArray(item.list)) {\n    item.list.forEach(el => {\n      if (typeof el === \"string\") {\n        texts.push(el);\n      } else if (typeof el === \"object\" && el !== null) {\n        // Recursive extraction if list contains objects\n        texts = texts.concat(extractText(el));\n      }\n    });\n  }\n\n  return texts;\n}\n\nlet allTexts = [];\n\n// Loop through each item in the workflow\nfor (let item of $input.first().json.text_blocks) {\n  allTexts = allTexts.concat(extractText(item));\n}\n\n// Join everything into a single string (space-separated)\nreturn [{ json: { combinedString: allTexts.join(' ') } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        784,
+        336
+      ],
+      "id": "9fba6867-6384-4157-a1a6-d3f860afd99b",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        560
+      ],
+      "id": "1c693ebd-ef22-49fd-9257-e146234e6157",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "2BOXwIUduX6cNIfH",
+          "name": "Ollama account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google_ai_mode search": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google_ai_mode search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "9cd3f194-f42f-47aa-b70a-8fc9249bde37",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2d464ccde06dc2cbc6978225cdb294dd9f8ed09cb0b713f0d34b5afe8615918a"
+  },
+  "id": "u0Nnml6BmmgZRH2TbxCki",
+  "tags": []
+}
