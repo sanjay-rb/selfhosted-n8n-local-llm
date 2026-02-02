@@ -10,6 +10,22 @@ services:
       - ollama_data:/root/.ollama
     restart: unless-stopped
 
+  videogen:
+    image: python:3.12-slim
+    container_name: videogen
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./videogen:/app
+      - videogen_data:/root/.cache/huggingface
+    working_dir: /app
+    command: >
+      sh -c "
+      pip install fastapi uvicorn diffusers[torch] transformers accelerate torch safetensors &&
+      python app.py
+      "
+    restart: unless-stopped
+
   n8n:
     image: docker.n8n.io/n8nio/n8n
     container_name: n8n
@@ -24,8 +40,10 @@ services:
       - n8n_data:/home/node/.n8n
     depends_on:
       - ollama
+      - videogen
     restart: unless-stopped
 
 volumes:
   n8n_data:
   ollama_data:
+  videogen_data:
