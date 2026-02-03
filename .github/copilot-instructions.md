@@ -35,13 +35,16 @@ docker exec ollama ollama pull llama3.2:3b
 
 ### Workflows
 - Stored as JSON files (e.g., `Today's Penny Stock.json`)
-- Use n8n nodes: ManualTrigger, SerpAPI, LangChain Agent
-- Integrate external APIs (SerpAPI) with local Ollama
+- Use n8n nodes: ManualTrigger, SerpAPI, LangChain Agent, LangChain Chain LLM, Code (JavaScript), Ollama Chat Model, Telegram
+- Integrate external APIs (SerpAPI for search, Telegram for notifications) with local Ollama
+- Data processing: Use JavaScript Code nodes for JSON manipulation and text extraction
+- Prompt engineering: Define system messages and prompts for financial analysis and recommendations
+- Credentials: Set up API keys for SerpAPI, Telegram, Ollama
 
 ## Key Files
 - `docker-compose.yml`: Service definitions and volumes
 - `README.md`: Complete setup, troubleshooting, and usage examples
-- Workflow JSONs: n8n automation examples
+- Workflow JSONs: n8n automation examples (e.g., penny stock analysis with search, LLM processing, and messaging)
 
 ## Troubleshooting Patterns
 - Service unreachable: Use Docker service names in URLs
