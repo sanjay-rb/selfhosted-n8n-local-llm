@@ -11,13 +11,16 @@ Self-hosted **n8n + Ollama (Llama3.2)** stack for **8GB M1/M2 Macs**.
 git clone https://github.com/sanjay-rb/selfhosted-n8n-local-llm.git
 cd selfhosted-n8n-local-llm
 
-# 2. Start stack
+# 2. Make init script executable (required for PostgreSQL setup)
+chmod +x init-data.sh
+
+# 3. Start stack
 docker compose up -d
 
-# 3. Install Ollama model (one-time)
+# 4. Install Ollama model (one-time, 2-5min)
 docker exec ollama ollama pull llama3.2:3b
 
-# 4. Access:
+# 5. Access:
 # n8n: http://localhost:5678
 # Ollama API: http://localhost:11434
 ```
@@ -72,6 +75,16 @@ RAM usage: ~3-4GB peak
 
 ## 🔧 **Troubleshooting**
 
+### **PostgreSQL: "password authentication failed"?**
+```bash
+# Ensure init-data.sh is executable:
+chmod +x init-data.sh
+
+# Then restart:
+docker compose down -v
+docker compose up -d
+```
+
 ### **Ollama "model not found"?**
 ```bash
 docker exec ollama ollama pull llama3.2:3b
@@ -81,11 +94,13 @@ docker exec ollama ollama pull llama3.2:3b
 ### **n8n can't reach Ollama?**
 ```
 Use http://ollama:11434 (not localhost)
+Services communicate via shared 'backend' Docker network
 ```
 
 ### **Clean restart:**
 ```bash
 docker compose down -v
+chmod +x init-data.sh
 docker compose up -d
 docker exec ollama ollama pull llama3.2:3b
 ```

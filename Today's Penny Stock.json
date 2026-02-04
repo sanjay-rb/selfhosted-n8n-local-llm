@@ -9,7 +9,7 @@
         0,
         0
       ],
-      "id": "834466b7-0bb3-4ca4-ae90-8b7c83cfe2e4",
+      "id": "a36c3d29-c8a0-4d33-9197-d554ddcd6f3e",
       "name": "When clicking ‘Execute workflow’"
     },
     {
@@ -26,7 +26,7 @@
         1024,
         0
       ],
-      "id": "7a0cec2c-7318-4ae6-9a4b-3953653de0ed",
+      "id": "cd7a8de9-3c9a-48fd-a876-c9939607a208",
       "name": "AI Agent"
     },
     {
@@ -41,12 +41,12 @@
         1376,
         0
       ],
-      "id": "c5bef26a-5bd9-41e1-a95e-41c550c51b88",
+      "id": "d9fc8c01-849f-40c2-b436-53c73a3463b7",
       "name": "Send a text message",
       "webhookId": "4c1b6737-50b6-495d-bae2-38f71a6777be",
       "credentials": {
         "telegramApi": {
-          "id": "ZwzepDAQt4vtO7Lx",
+          "id": "6jMirS2HbisMots0",
           "name": "Telegram account"
         }
       }
@@ -63,7 +63,7 @@
         672,
         0
       ],
-      "id": "15508ee3-8367-4f03-bc4a-c5a21fc65a70",
+      "id": "c573e314-24c9-4fe3-80f3-a82e409183d5",
       "name": "Basic LLM Chain"
     },
     {
@@ -76,7 +76,7 @@
         448,
         0
       ],
-      "id": "b43672a9-2234-4fd3-a80b-cbc1c771a70a",
+      "id": "bd1795d5-f351-4aec-a258-eac9286ada0b",
       "name": "Code in JavaScript"
     },
     {
@@ -87,14 +87,14 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
       "typeVersion": 1,
       "position": [
-        752,
+        744,
         224
       ],
-      "id": "22ae806b-4971-40b1-9a5a-84f526e2dc34",
+      "id": "7f3c7af2-0503-43cf-8ed6-fb873541100e",
       "name": "Ollama Chat Model",
       "credentials": {
         "ollamaApi": {
-          "id": "5qPw92V6OUW32BDf",
+          "id": "W0UOQpSwzjak8K3I",
           "name": "Ollama account"
         }
       }
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-serpapi.serpApi",
       "typeVersion": 1,
       "position": [
-        208,
+        224,
         0
       ],
-      "id": "3c82e147-b69e-4ab0-bb38-9fe9f44f6819",
-      "name": "Google_ai_mode search",
+      "id": "4c438532-971d-4038-b226-c00118ab8a8c",
+      "name": "Google_ai_mode search1",
       "credentials": {
         "serpApi": {
-          "id": "QYAbMklYpHAmQaSz",
+          "id": "IjhcqiVmPxQBHVPc",
           "name": "SerpApi account"
         }
       }
@@ -177,14 +177,14 @@
       "main": [
         [
           {
-            "node": "Google_ai_mode search",
+            "node": "Google_ai_mode search1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Google_ai_mode search": {
+    "Google_ai_mode search1": {
       "main": [
         [
           {
@@ -199,13 +199,14 @@
   "active": false,
   "settings": {
     "executionOrder": "v1",
+    "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "692c1738-8646-4628-9269-7f42f656b4f4",
+  "versionId": "4e50bad9-b978-4375-8751-5db3b9e4cd11",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "24c6b119c40a03b8a7273cd2f468c3a42ba4e81cb3fdf6d54eba78def5c0f9af"
+    "instanceId": "1e388271122b5c7f6905409ccac37294ee28401e272bdc0dfe03f8a794a96377"
   },
-  "id": "3B53fN5XpkBqMQfmiG9Jv",
+  "id": "DTTEp5fLYPtXYSY4nKOo2",
   "tags": []
 }
