@@ -1,6 +1,20 @@
 version: "3.8"
 
 services:
+  short_video_maker:
+    image: gyoridavid/short-video-maker
+    container_name: short-video-maker
+    ports:
+      - "3123:3123"
+    environment:
+      - PORT=3123
+      - PEXELS_API_KEY=${PEXELS_API_KEY}
+    volumes:
+      - video_output:/app/output
+    restart: unless-stopped
+    networks:
+      - backend
+
   postgres:
     image: postgres:16
     container_name: postgres
@@ -64,6 +78,7 @@ volumes:
   n8n_data:
   ollama_data:
   db_storage:
+  video_output:
 
 networks:
   backend:
