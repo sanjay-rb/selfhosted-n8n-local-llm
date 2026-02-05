@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  short_video_maker:
+  short-video-maker:
     image: gyoridavid/short-video-maker
     container_name: short-video-maker
     ports:
@@ -70,7 +70,8 @@ services:
       - n8n_data:/home/node/.n8n
     restart: unless-stopped
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - backend
 
