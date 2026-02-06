@@ -1,0 +1,542 @@
+{
+  "name": "Youtube Shorts Generator",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        80
+      ],
+      "id": "3bafd3d6-4749-419b-9727-ca5e4cb6881b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "http://short-video-maker:3123/health",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1728,
+        80
+      ],
+      "id": "2780c662-4213-49c4-b7aa-99535474d020",
+      "name": "Short Video Health Check"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "73f4d65e-a935-4ba6-beb9-bc64d0fd8dca",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "ready",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2848,
+        -96
+      ],
+      "id": "b06ddc90-0d0c-4392-9d74-8934d50c8117",
+      "name": "If",
+      "notesInFlow": true,
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://short-video-maker:3123/api/short-video",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2400,
+        -32
+      ],
+      "id": "9d0c8dfa-2cca-4cb7-b316-bc06f54b47ff",
+      "name": "Generate Stock Video"
+    },
+    {
+      "parameters": {
+        "url": "=http://short-video-maker:3123/api/short-video/{{ $('Generate Stock Video').item.json.videoId }}/status",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2624,
+        -32
+      ],
+      "id": "b138e13d-e138-4a98-8d05-82a2d6d9ba90",
+      "name": "Check Video Status"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3072,
+        80
+      ],
+      "id": "df5d73a5-b916-4570-816f-d0637054e800",
+      "name": "Wait",
+      "webhookId": "1b5a0017-c5ed-4b7f-981d-4cb1aca74334"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "78531c39-86ea-42a4-a2f6-4a1e96111d9e",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "ok",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1952,
+        80
+      ],
+      "id": "1b8070d6-d407-4742-ac15-e56a45d2c1df",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "errorMessage": "short-video-maker not running, please check http://localhost:3123/."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        2176,
+        176
+      ],
+      "id": "4665f8ce-0a6f-44cf-8be4-f28d136d8b5a",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:1b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        752,
+        304
+      ],
+      "id": "2fbe09c2-a4ac-4418-9c17-c77cee172010",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "W0UOQpSwzjak8K3I",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Google AI Mode (SerpAPI) output:\n{{ $json.combinedString }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a scene generation bot.\n\nYou will receive a text snippet from Google AI Mode output as input.\nUse ONLY the text provided. Do NOT add anything extra.\n\nTASK:\nCreate exactly short cinematic scenes for stock video inspired by the text. Each scene must be motivational, visually vivid, and emotionally engaging, capturing the essence of the story.\n\nFORMAT (follow exactly):\n\nScene 1\nText: <one short cinematic sentence describing the scene visually and emotionally>\nSearchTerms: <2–5 comma separated keywords describing visuals, emotions, and action>\n\nScene 2\nText: <one short cinematic sentence describing the scene visually and emotionally>\nSearchTerms: <2–5 comma separated keywords describing visuals, emotions, and action>\n\nScene 3\nText: <one short cinematic sentence describing the scene visually and emotionally>\nSearchTerms: <2–5 comma separated keywords describing visuals, emotions, and action>\n\nRULES:\n\nOutput plain text only.\n\nDo NOT use JSON.\n\nDo NOT use markdown.\n\nDo NOT explain anything.\n\nText must be visual, cinematic, and motivational.\n\nText must NOT be empty.\n\nSearchTerms must NOT be empty and should include concrete, vivid, and relevant keywords.\n\nUse simple, clear, and descriptive words.\n\nEach SearchTerms line must have at least 2 keywords.\n\nScenes should reflect the story’s mood, action, struggle, or triumph visually.\n\nKeep each scene concise, cinematic, and stock-video-ready.\n\nIf the input story is short, expand each scene slightly to create cinematic depth while staying true to the story.\n\nOUTPUT:\nOnly the scenes in the format above."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        672,
+        80
+      ],
+      "id": "56c25460-fbc9-46ba-9d46-1b5e9b2313bd",
+      "name": "Scene Generator"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Now convert this input:\n\n{{ $json.text }}\n",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Convert the given scene text into JSON with this format:\n\n{\n  \"scenes\": [\n    { \"text\": \"string\", \"searchTerms\": [\"string\"] }\n  ]\n}\n\nRules:\n- Output ONLY valid JSON.\n- Preserve scene order.\n- Split SearchTerms by commas into an array.\n- Trim extra spaces.\n- Do NOT add extra text or fields.\n\nExample:\n\nInput:\nScene 1\nText: A cat sits on the windowsill watching the sunrise.\nSearchTerms: cat, sunrise\n\nScene 2\nText: A child plays with a dog in a park.\nSearchTerms: child, dog, park\n\nOutput:\n{\n  \"scenes\": [\n    {\n      \"text\": \"A cat sits on the windowsill watching the sunrise.\",\n      \"searchTerms\": [\"cat\", \"sunrise\"]\n    },\n    {\n      \"text\": \"A child plays with a dog in a park.\",\n      \"searchTerms\": [\"child\", \"dog\", \"park\"]\n    }\n  ]\n}\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1024,
+        80
+      ],
+      "id": "f72c2909-bf98-411a-8418-4cce747f19ea",
+      "name": "JSON Convertor"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"type\": \"object\",\n  \"required\": [\n    \"scenes\"\n  ],\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"scenes\": {\n      \"type\": \"array\",\n      \"minItems\": 1,\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"text\",\n          \"searchTerms\"\n        ],\n        \"additionalProperties\": false,\n        \"properties\": {\n          \"text\": {\n            \"type\": \"string\",\n            \"minLength\": 1,\n            \"description\": \"Narration or on-screen text for the scene\"\n          },\n          \"searchTerms\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"string\",\n              \"minLength\": 1\n            },\n            \"minItems\": 1,\n            \"description\": \"Stock video search keywords for the scene\"\n          }\n        }\n      }\n    }\n  }\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        1376,
+        80
+      ],
+      "id": "4e24e165-66c6-4bab-a8d8-b49e4f20bd89",
+      "name": "JSON Information Extractor"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n    \"scenes\": $('JSON Information Extractor').first().json.output.scenes,\n    \"config\": {\n        \"paddingBack\": 1500,\n        \"voice\": \"af_alloy\"\n    }\n}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2176,
+        -32
+      ],
+      "id": "87a27849-c337-468a-b072-b1b08cf7eae5",
+      "name": "Update Video Config"
+    },
+    {
+      "parameters": {
+        "url": "=http://short-video-maker:3123/api/short-video/{{ $('Generate Stock Video').item.json.videoId }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3072,
+        -144
+      ],
+      "id": "c858b551-677d-43a5-b6d9-96fcc4f51ecb",
+      "name": "Download Video"
+    },
+    {
+      "parameters": {
+        "operation": "sendVideo",
+        "chatId": "851414436",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3296,
+        -144
+      ],
+      "id": "03a60e83-9cb0-433b-a8c7-53b084a83cdf",
+      "name": "Send a video1",
+      "webhookId": "98d4b1cf-2e49-45d0-844b-e8d16f2a2040",
+      "credentials": {
+        "telegramApi": {
+          "id": "6jMirS2HbisMots0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Recursive function to extract all text\nfunction extractText(item) {\n  let texts = [];\n\n  // Add snippet if it exists\n  if (item.snippet && typeof item.snippet === \"string\") {\n    texts.push(item.snippet);\n  }\n\n  // If item has a 'list' array, add each element\n  if (Array.isArray(item.list)) {\n    item.list.forEach(el => {\n      if (typeof el === \"string\") {\n        texts.push(el);\n      } else if (typeof el === \"object\" && el !== null) {\n        // Recursive extraction if list contains objects\n        texts = texts.concat(extractText(el));\n      }\n    });\n  }\n\n  return texts;\n}\n\nlet allTexts = [];\n\n// Loop through each item in the workflow\nfor (let item of $input.first().json.text_blocks) {\n  allTexts = allTexts.concat(extractText(item));\n}\n\n// Join everything into a single string (space-separated)\nreturn [{ json: { combinedString: allTexts.join(' ') } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        80
+      ],
+      "id": "745a87c0-9b20-478a-a349-c03723572add",
+      "name": "SERP API Responce to Text"
+    },
+    {
+      "parameters": {
+        "operation": "google_ai_mode",
+        "q": "Generate a single short motivation real story of the day as a paragraph which I can convert into 20–40 seconds video",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApi",
+      "typeVersion": 1,
+      "position": [
+        224,
+        80
+      ],
+      "id": "38c53fe1-bf66-4381-b49e-86817bcd076b",
+      "name": "Google AI Mode Search",
+      "credentials": {
+        "serpApi": {
+          "id": "IjhcqiVmPxQBHVPc",
+          "name": "SerpApi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google AI Mode Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Short Video Health Check": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Download Video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Stock Video": {
+      "main": [
+        [
+          {
+            "node": "Check Video Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Video Status": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Check Video Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Update Video Config",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Scene Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "JSON Convertor",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "JSON Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scene Generator": {
+      "main": [
+        [
+          {
+            "node": "JSON Convertor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JSON Convertor": {
+      "main": [
+        [
+          {
+            "node": "JSON Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JSON Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Short Video Health Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Video Config": {
+      "main": [
+        [
+          {
+            "node": "Generate Stock Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Video": {
+      "main": [
+        [
+          {
+            "node": "Send a video1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SERP API Responce to Text": {
+      "main": [
+        [
+          {
+            "node": "Scene Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google AI Mode Search": {
+      "main": [
+        [
+          {
+            "node": "SERP API Responce to Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "bca1dabb-896c-42fe-8a10-b85ce8e9bfa9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1e388271122b5c7f6905409ccac37294ee28401e272bdc0dfe03f8a794a96377"
+  },
+  "id": "c90r5Ha828SxZg7IOFulp",
+  "tags": []
+}
